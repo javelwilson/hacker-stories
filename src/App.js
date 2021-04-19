@@ -65,14 +65,14 @@ const Search = ({ search, onSearch }) => {
   }
 
   return (
-    <div>
+    <>
       <label htmlFor="search">Search:</label>
       <input type="text" id="search" onChange={handleChange} value={search} />
 
       <p>
         Searching for <strong>{searchTerm}</strong>
       </p>
-    </div>
+    </>
   )
 }
 
