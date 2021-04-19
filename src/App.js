@@ -47,7 +47,14 @@ const App = () => {
     <div>
       <h1>My Hacker Stories</h1>
 
-      <Search onSearch={handleSearch} search={searchTerm} />
+      <InputWithLabel
+        id="search"
+        children
+        onInputChange={handleSearch}
+        value={searchTerm}
+      >
+        <strong>Search: </strong>
+      </InputWithLabel>
 
       <hr />
 
@@ -56,22 +63,18 @@ const App = () => {
   )
 }
 
-const Search = ({ search, onSearch }) => {
-  console.log('Search renders')
-  const [searchTerm, setSearchTerm] = useState('')
-  const handleChange = (event) => {
-    setSearchTerm(event.target.value)
-    onSearch(event)
-  }
-
+const InputWithLabel = ({
+  id,
+  children,
+  value,
+  type = 'text',
+  onInputChange,
+}) => {
+  console.log('InputWithLabel renders')
   return (
     <>
-      <label htmlFor="search">Search:</label>
-      <input type="text" id="search" onChange={handleChange} value={search} />
-
-      <p>
-        Searching for <strong>{searchTerm}</strong>
-      </p>
+      <label htmlFor={id}>{children}</label>
+      <input type={type} id={id} onChange={onInputChange} value={value} />
     </>
   )
 }
