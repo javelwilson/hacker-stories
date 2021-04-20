@@ -69,6 +69,8 @@ const storiesReducer = (state, action) => {
   }
 }
 
+const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query='
+
 const App = () => {
   console.log('App renders')
 
@@ -80,17 +82,20 @@ const App = () => {
   })
 
   React.useEffect(() => {
+    if (!searchTerm) return
+
     dispatchStories({ type: 'STORIES_FETCH_INIT' })
 
-    getAsyncStories()
+    fetch(`${API_ENDPOINT}${searchTerm}`)
+      .then((response) => response.json())
       .then((result) => {
         dispatchStories({
           type: 'STORIES_FETCH_SUCCESS',
-          payload: result.data.stories,
+          payload: result.hits,
         })
       })
       .catch(() => dispatchStories({ type: 'STORIES_FETCH_FAILURE' }))
-  }, [])
+  }, [searchTerm])
 
   const handleRemoveStory = (item) => {
     dispatchStories({
@@ -102,10 +107,6 @@ const App = () => {
   const handleSearch = (event) => {
     setSearchTerm(event.target.value)
   }
-
-  const searchedStories = stories.data.filter((story) =>
-    story.title.toLowerCase().includes(searchTerm.toLowerCase())
-  )
 
   return (
     <div>
@@ -128,7 +129,7 @@ const App = () => {
       {stories.isLoading ? (
         <p>Loading ...</p>
       ) : (
-        <List list={searchedStories} onRemoveItem={handleRemoveStory} />
+        <List list={stories.data} onRemoveItem={handleRemoveStory} />
       )}
     </div>
   )
