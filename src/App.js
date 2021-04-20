@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useState } from 'react'
+import React, { useReducer } from 'react'
 
 const useSemiPersistentState = (key, initialState) => {
   const [value, setValue] = React.useState(
@@ -11,30 +11,6 @@ const useSemiPersistentState = (key, initialState) => {
 
   return [value, setValue]
 }
-
-const initialStories = [
-  {
-    title: 'React',
-    url: 'https://reactjs.org/',
-    author: 'Jordan Walke',
-    num_comments: 3,
-    points: 4,
-    objectID: 0,
-  },
-  {
-    title: 'Redux',
-    url: 'https://redux.js.org/',
-    author: 'Dan Abramov, Andrew Clark',
-    num_comments: 2,
-    points: 5,
-    objectID: 1,
-  },
-]
-
-const getAsyncStories = () =>
-  new Promise((resolve) =>
-    setTimeout(() => resolve({ data: { stories: initialStories } }), 2000)
-  )
 
 const storiesReducer = (state, action) => {
   switch (action.type) {
@@ -81,7 +57,7 @@ const App = () => {
     isError: false,
   })
 
-  React.useEffect(() => {
+  const handleFetchStories = React.useCallback(() => {
     if (!searchTerm) return
 
     dispatchStories({ type: 'STORIES_FETCH_INIT' })
@@ -96,6 +72,10 @@ const App = () => {
       })
       .catch(() => dispatchStories({ type: 'STORIES_FETCH_FAILURE' }))
   }, [searchTerm])
+
+  React.useEffect(() => {
+    handleFetchStories()
+  }, [handleFetchStories])
 
   const handleRemoveStory = (item) => {
     dispatchStories({
