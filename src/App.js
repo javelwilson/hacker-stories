@@ -2,12 +2,18 @@ import React, { useReducer } from 'react'
 import axios from 'axios'
 
 const useSemiPersistentState = (key, initialState) => {
+  const isMounted = React.useRef(false)
   const [value, setValue] = React.useState(
     localStorage.getItem(key) || initialState
   )
 
   React.useEffect(() => {
-    localStorage.setItem(key, value)
+    if (!isMounted.current) {
+      isMounted.current = true
+    } else {
+      console.log('useSemiPersistentState')
+      localStorage.setItem(key, value)
+    }
   }, [key, value])
 
   return [value, setValue]
@@ -78,12 +84,12 @@ const App = () => {
     handleFetchStories()
   }, [handleFetchStories])
 
-  const handleRemoveStory = (item) => {
+  const handleRemoveStory = React.useCallback((item) => {
     dispatchStories({
       type: 'REMOVE_STORY',
       payload: item,
     })
-  }
+  }, [])
 
   const handleSearchInput = (event) => {
     setSearchTerm(event.target.value)
@@ -165,7 +171,7 @@ const InputWithLabel = ({
   )
 }
 
-const List = ({ list, onRemoveItem }) => {
+const List = React.memo(({ list, onRemoveItem }) => {
   console.log('List renders')
   return (
     <ul>
@@ -176,7 +182,7 @@ const List = ({ list, onRemoveItem }) => {
       })}
     </ul>
   )
-}
+})
 
 const Item = ({ item, onRemoveItem }) => {
   console.log('Item renders')
