@@ -1,5 +1,6 @@
 import React, { useReducer } from 'react'
 import axios from 'axios'
+import { sortBy } from 'lodash'
 
 const useSemiPersistentState = (key, initialState) => {
   const isMounted = React.useRef(false)
@@ -171,35 +172,119 @@ const InputWithLabel = ({
   )
 }
 
+const SORTS = {
+  NONE: (list) => list,
+  TITLE: (list) => sortBy(list, 'title'),
+  AUTHOR: (list) => sortBy(list, 'author'),
+  COMMENT: (list) => sortBy(list, 'num_comments').reverse(),
+  POINT: (list) => sortBy(list, 'points').reverse(),
+}
+
 const List = React.memo(({ list, onRemoveItem }) => {
   console.log('List renders')
+  const [sort, setSort] = React.useState('NONE')
+
+  const handleSort = (sortKey) => {
+    setSort(sortKey)
+  }
+
+  const sortFunction = SORTS[sort]
+  const sortedList = sortFunction(list)
+
   return (
-    <ul>
-      {list.map(function (item) {
-        return (
-          <Item key={item.objectID} item={item} onRemoveItem={onRemoveItem} />
-        )
-      })}
-    </ul>
+    <table>
+      <thead>
+        <tr>
+          <th>
+            <span>
+              <button
+                type="button"
+                onClick={() => handleSort('TITLE')}
+                style={{ background: `${sort === 'TITLE' ? 'green' : 'none'}` }}
+              >
+                Title
+              </button>
+            </span>
+          </th>
+          <th>
+            <span>
+              <button
+                type="button"
+                onClick={() => handleSort('AUTHOR')}
+                style={{
+                  background: `${sort === 'AUTHOR' ? 'green' : 'none'}`,
+                }}
+              >
+                Author
+              </button>
+            </span>
+          </th>
+          <th>
+            <span>
+              <button
+                type="button"
+                onClick={() => handleSort('COMMENT')}
+                style={{
+                  background: `${sort === 'COMMENT' ? 'green' : 'none'}`,
+                }}
+              >
+                Comments
+              </button>
+            </span>
+          </th>
+          <th>
+            <span>
+              <button
+                type="button"
+                onClick={() => handleSort('POINT')}
+                style={{
+                  background: `${sort === 'POINT' ? 'green' : 'none'}`,
+                }}
+              >
+                Points
+              </button>
+            </span>
+          </th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {sortedList.map(function (item) {
+          return (
+            <Item key={item.objectID} item={item} onRemoveItem={onRemoveItem} />
+          )
+        })}
+      </tbody>
+    </table>
   )
 })
 
 const Item = ({ item, onRemoveItem }) => {
   console.log('Item renders')
   return (
-    <li>
-      <span>
-        <a href={item.url}>{item.title}</a>
-      </span>
-      <span>{item.author}</span>
-      <span>{item.num_comments}</span>
-      <span>{item.points}</span>
-      <span>
-        <button type="button" onClick={() => onRemoveItem(item)}>
-          Dismiss
-        </button>
-      </span>
-    </li>
+    <tr>
+      <td>
+        <span>
+          <a href={item.url}>{item.title}</a>
+        </span>
+      </td>
+      <td>
+        <span>{item.author}</span>
+      </td>
+      <td>
+        <span>{item.num_comments}</span>
+      </td>
+      <td>
+        <span>{item.points}</span>
+      </td>
+      <td>
+        <span>
+          <button type="button" onClick={() => onRemoveItem(item)}>
+            Dismiss
+          </button>
+        </span>
+      </td>
+    </tr>
   )
 }
 
